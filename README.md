@@ -16,7 +16,7 @@ To run this server, ensure you have [uv](https://docs.astral.sh/uv/#getting-star
 uv run server.py
 ```
 
-The server will be accessible at `http://0.0.0.0:8000`.
+The server will be accessible at `http://0.0.0.0:7144`.
 
 ## Endpoints
 
