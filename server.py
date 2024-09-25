@@ -3,13 +3,15 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image
 import requests
 import io
+import torch
 from transformers import AutoModel
 from pydantic import BaseModel, Field
 
 app = FastAPI()
 
 def load_model():
-    return AutoModel.from_pretrained('jinaai/jina-clip-v1', trust_remote_code=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return AutoModel.from_pretrained('jinaai/jina-clip-v1', trust_remote_code=True).to(device)
 
 model = None
 
@@ -57,4 +59,5 @@ async def embed(request: EmbedRequest):
 
 if __name__ == "__main__":
     import uvicorn
+    get_model()
     uvicorn.run(app, host="0.0.0.0", port=8000)
