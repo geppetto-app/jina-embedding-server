@@ -51,7 +51,7 @@ The model used is `jinaai/jina-clip-v1`, which is a pre-trained version of the C
 To encode text, send a POST request to `/embed/` with a payload containing the `text` field:
 
 ```bash
-curl -X POST "http://0.0.0.0:8000/embed/" \
+curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
   "text": ["This is a text example.", "Another text example."]
@@ -63,7 +63,7 @@ curl -X POST "http://0.0.0.0:8000/embed/" \
 To encode images, send a POST request to `/embed/` with a payload containing the `image` field:
 
 ```bash
-curl -X POST "http://0.0.0.0:8000/embed/" \
+curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
   "image": ["http://example.com/image1.jpg", "http://example.com/image2.jpg"]
@@ -75,7 +75,7 @@ curl -X POST "http://0.0.0.0:8000/embed/" \
 To encode both text and images, send a POST request to `/embed/` with a payload containing both the `text` and `image` fields:
 
 ```bash
-curl -X POST "http://0.0.0.0:8000/embed/" \
+curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
   "text": ["This is a text example."],
