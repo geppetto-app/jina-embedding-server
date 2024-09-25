@@ -1,0 +1,16 @@
+[project]
+name = "jina-embedding-server"
+version = "0.1.0"
+description = "Very basic embedding server for jinaai/jina-clip-v1"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "einops>=0.8.0",
+    "fastapi>=0.115.0",
+    "pillow>=10.4.0",
+    "ruff>=0.6.7",
+    "timm>=1.0.9",
+    "torch>=2.4.1",
+    "transformers>=4.44.2",
+    "uvicorn>=0.30.6",
+]
