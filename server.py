@@ -1,3 +1,5 @@
+import base64
+import re
 from typing import List, Literal, Union
 from fastapi import FastAPI, HTTPException
 from PIL import Image
@@ -29,8 +31,13 @@ def encode_image(url: str) -> List[float]:
         if url.startswith('http'):
             response = requests.get(url)
             img = Image.open(io.BytesIO(response.content))
+        elif url.startswith('data:image/'):
+            # Handle data URIs
+            image_data = re.sub('^data:image/.+;base64,', '', url)
+            img = Image.open(io.BytesIO(base64.b64decode(image_data)))
         else:
-            img = Image.open(url)
+            raise ValueError("Unsupported URL scheme")
+
         return get_model().encode_image(img).tolist()
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing image {url}: {str(e)}")
