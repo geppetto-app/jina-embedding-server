@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Literal, Union
 from fastapi import FastAPI, HTTPException
 from PIL import Image
 import requests
 import io
 import torch
 from transformers import AutoModel
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 app = FastAPI()
 
@@ -21,41 +21,40 @@ def get_model():
         model = load_model()
     return model
 
-def encode_text(sentences: List[str]) -> List[List[float]]:
+def encode_text(sentences: str) -> List[float]:
     return get_model().encode_text(sentences).tolist()
 
-def encode_image(image_urls: List[str]) -> List[List[float]]:
-    embeddings = []
-    for url in image_urls:
-        try:
-            if url.startswith('http'):
-                response = requests.get(url)
-                img = Image.open(io.BytesIO(response.content))
-            else:
-                img = Image.open(url)
-            embeddings.append(get_model().encode_image(img).tolist())
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Error processing image {url}: {str(e)}")
-    return embeddings
+def encode_image(url: str) -> List[float]:
+    try:
+        if url.startswith('http'):
+            response = requests.get(url)
+            img = Image.open(io.BytesIO(response.content))
+        else:
+            img = Image.open(url)
+        return get_model().encode_image(img).tolist()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing image {url}: {str(e)}")
+
+class EmbedItem(BaseModel):
+    type: Literal["text", "image"]
+    data: Union[str, HttpUrl]
 
 class EmbedRequest(BaseModel):
-    text: List[str] = Field(None, description="List of text sentences")
-    image: List[str] = Field(None, description="List of image URLs")
+    inputs: List[EmbedItem] = Field(..., min_items=1)
 
 @app.post("/embed")
 async def embed(request: EmbedRequest):
-    if not request.text and not request.image:
-        raise HTTPException(status_code=400, detail="Both text and image lists are empty")
+    embeddings = []
 
-    response = {}
+    for item in request.inputs:
+        if item.type == 'text':
+            embeddings.append(encode_text(item.data))
+        elif item.type == 'image':
+            embeddings.append(encode_image(item.data))
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid type {item.type}")
 
-    if request.text:
-        response["text_embeddings"] = encode_text(request.text)
-
-    if request.image:
-        response["image_embeddings"] = encode_image(request.image)
-
-    return response
+    return {"embeddings": embeddings}
 
 if __name__ == "__main__":
     import uvicorn
