@@ -4,8 +4,8 @@ This is a basic embedding server built using FastAPI for processing text and ima
 
 ## Table of Contents
 1. [Getting Started](#getting-started)
-2. [Endpoints](#endpoints)
-3. [Model](#model)
+2. [Model](#model)
+3. [Endpoints](#endpoints)
 4. [Usage](#usage)
 
 ## Getting Started
@@ -18,31 +18,43 @@ uv run server.py
 
 The server will be accessible at `http://0.0.0.0:7144`.
 
+## Model
+
+The model used is `jinaai/jina-clip-v1`, which is a pre-trained version of the CLIP (Contrastive Language-Image Pre-training) model. This model can generate embeddings for both text and images.
+
+It outputs a 768 dimensional vector.
+
 ## Endpoints
 
 ### `/embed/` (POST)
 
-- **Description**: This endpoint takes a JSON payload containing lists of text sentences and image URLs, and returns their corresponding embeddings.
+- **Description**: This endpoint takes a JSON payload containing text sentences and/or image URLs, and returns their corresponding embeddings.
 
 - **Request Payload**:
   ```json
   {
-    "text": ["This is a text example.", "Another text example."],
-    "image": ["http://example.com/image1.jpg", "http://example.com/image2.jpg"]
+    "inputs": [
+      {
+        "type": "text",
+        "data": "This is a text example."
+      },
+      {
+        "type": "image",
+        "data": "http://example.com/image1.jpg"
+      }
+    ]
   }
   ```
 
 - **Response**:
   ```json
   {
-    "text_embeddings": [[0.1, 0.2, ...], [0.3, 0.4, ...]],
-    "image_embeddings": [[0.5, 0.6, ...], [0.7, 0.8, ...]]
+    "embeddings": [
+      [0.1, 0.2, ...],
+      [0.5, 0.6, ...]
+    ]
   }
   ```
-
-## Model
-
-The model used is `jinaai/jina-clip-v1`, which is a pre-trained version of the CLIP (Contrastive Language-Image Pre-training) model. This model can generate embeddings for both text and images.
 
 ## Usage
 
@@ -54,7 +66,12 @@ To encode text, send a POST request to `/embed/` with a payload containing the `
 curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
-  "text": ["This is a text example.", "Another text example."]
+  "inputs": [
+    {
+      "type": "text",
+      "data": "This is a text example."
+    }
+  ]
 }'
 ```
 
@@ -66,7 +83,12 @@ To encode images, send a POST request to `/embed/` with a payload containing the
 curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
-  "image": ["http://example.com/image1.jpg", "http://example.com/image2.jpg"]
+  "inputs": [
+    {
+      "type": "image",
+      "data": "http://example.com/image1.jpg"
+    }
+  ]
 }'
 ```
 
@@ -78,14 +100,22 @@ To encode both text and images, send a POST request to `/embed/` with a payload 
 curl -X POST "http://0.0.0.0:7144/embed/" \
 -H "Content-Type: application/json" \
 -d '{
-  "text": ["This is a text example."],
-  "image": ["http://example.com/image1.jpg"]
+  "inputs": [
+    {
+      "type": "text",
+      "data": "This is a text example."
+    },
+    {
+      "type": "image",
+      "data": "http://example.com/image1.jpg"
+    }
+  ]
 }'
 ```
 
 ## Notes
 
-- The server handles both local and remote image URLs.
+- The server handles both URLs and base64 encoded data URIs.
 - If an error occurs while processing an image, the server will return a 400 Bad Request response with details about the error.
 
 This server provides a simple way to integrate text and image embeddings into your applications using FastAPI and CLIP.
